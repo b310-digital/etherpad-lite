@@ -24,7 +24,8 @@ services:
           ep_disable_imports
         INSTALL_SOFFICE: 'true'
     depends_on:
-      - mariadb_prod
+      mariadb_prod:
+        condition: service_healthy
     environment:
       DB_CHARSET: ${DOCKER_COMPOSE_APP_PROD_ENV_DB_CHARSET:-utf8mb4}
       DB_HOST: mariadb_prod
@@ -74,6 +75,17 @@ services:
       - ./ca/server.crt:/var/lib/mysql/server.crt
       - ./ca/server.key:/var/lib/mysql/server.key
       - mariadb_prod_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - "CMD"
+        - "mysqladmin"
+        - "ping"
+        - "--host=localhost"
+        - "--user=${DOCKER_COMPOSE_MARIADB_PROD_ENV_MARIADB_USER:?}"
+        - "--password=${DOCKER_COMPOSE_MARIADB_PROD_ENV_MARIADB_PASSWORD:?}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mariadb_prod_data:
