@@ -651,7 +651,7 @@
    * Enable/Disable case-insensitive pad names.
    */
   "lowerCasePadIds": "${LOWER_CASE_PAD_IDS:false}",
-  
+ 
   /*
    * Allow only some file formats
    */
