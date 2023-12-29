@@ -12,35 +12,15 @@ capabilities, and runs on _your_ server, under _your_ control.
 
 ## Try it out
 
-Etherpad is extremely flexible providing you the means to modify it to solve
-whatever problem your community has. We provide some demo instances for you try
-different experiences available within Etherpad. Pad content is automatically
-removed after 24 hours.
-
-  * [Rich Editing](https://rich.etherpad.com) - A full rich text WYSIWYG editor.
-  * [Minimalist editor](https://minimalist.etherpad.com) - A minimalist editor
-    that can be embedded within your tool.
-  * [Dark Mode](https://dark.etherpad.com) - Theme settings to have Etherpad
-    start in dark mode, ideal for using Etherpad at night or for long durations.
-  * [Images](https://image.etherpad.com) - Plugins to improve provide Image
-    support within a pad.
-  * [Video Chat](https://video.etherpad.com) - Plugins to enable Video and Audio
-    chat in a pad.
-  * [Collaboration++](https://collab.etherpad.com) - Plugins to improve the
-    really-real time collaboration experience, suitable for busy pads.
-  * [Document Analysis](https://analysis.etherpad.com) - Plugins to improve
-    author and document analysis during and post creation.
-  * [Scale](https://shard.etherpad.com) - Etherpad running at scale with pad
-    sharding which allows Etherpad to scale to ∞ number of Active Pads with up
-    to ~20,000 edits per second, per pad.
+Wikimedia provide a [public Etherpad instance for you to Try Etherpad out.](https://etherpad.wikimedia.org) or [use another public Etherpad instance to see other features](https://github.com/ether/etherpad-lite/wiki/Sites-That-Run-Etherpad#sites-that-run-etherpad)
 
 ## Project Status
+
+We're looking for maintainers and have some funding available.  Please contact John McLear if you can help.
 
 ### Code Quality
 
 [![Code Quality](https://github.com/ether/etherpad-lite/actions/workflows/codeql-analysis.yml/badge.svg?color=%2344b492)](https://github.com/ether/etherpad-lite/actions/workflows/codeql-analysis.yml)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/ether/etherpad-lite.svg?logo=lgtm&logoWidth=18&color=%2344b492)](https://lgtm.com/projects/g/ether/etherpad-lite/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/ether/etherpad-lite.svg?logo=lgtm&logoWidth=18&color=%2344b492)](https://lgtm.com/projects/g/ether/etherpad-lite/context:javascript)
 [![package.lock](https://github.com/ether/etherpad-lite/actions/workflows/lint-package-lock.yml/badge.svg?color=%2344b492)](https://github.com/ether/etherpad-lite/actions/workflows/lint-package-lock.yml)
 
 ### Testing
@@ -66,15 +46,14 @@ removed after 24 hours.
 
 ### Requirements
 
-[Node.js](https://nodejs.org/) >= **12.17.0**.
+[Node.js](https://nodejs.org/) >= **18.18.2**.
 
 ### GNU/Linux and other UNIX-like systems
 
 #### Quick install on Debian/Ubuntu
 
+Install the latest Node.js LTS per [official install instructions](https://github.com/nodesource/distributions#installation-instructions), then:
 ```sh
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt install -y nodejs
 git clone --branch master https://github.com/ether/etherpad-lite.git &&
 cd etherpad-lite &&
 src/bin/run.sh
@@ -136,7 +115,7 @@ following:
 
 ### Docker container
 
-Find [here](doc/docker.md) information on running Etherpad in a container.
+Find [here](doc/docker.adoc) information on running Etherpad in a container.
 
 ## Plugins
 

@@ -15,8 +15,7 @@
  */
 
 const OpenAPIBackend = require('openapi-backend').default;
-const formidable = require('formidable');
-const {promisify} = require('util');
+const IncomingForm = require('formidable').IncomingForm;
 const cloneDeep = require('lodash.clonedeep');
 const createHTTPError = require('http-errors');
 
@@ -596,9 +595,13 @@ exports.expressPreSession = async (hookName, {app}) => {
           // read form data if method was POST
           let formData = {};
           if (c.request.method === 'post') {
-            const form = new formidable.IncomingForm();
-            const parseForm = promisify(form.parse).bind(form);
-            formData = await parseForm(req);
+            const form = new IncomingForm();
+            formData = (await form.parse(req))[0];
+            for (const k of Object.keys(formData)) {
+              if (formData[k] instanceof Array) {
+                formData[k] = formData[k][0];
+              }
+            }
           }
 
           const fields = Object.assign({}, header, params, query, formData);
@@ -693,10 +696,20 @@ exports.expressPreSession = async (hookName, {app}) => {
   }
 };
 
-// helper to get api root
+/**
+ * Helper to get the current root path for an API version
+ * @param {String} version The API version
+ * @param {APIPathStyle} style The style of the API path
+ * @return {String} The root path for the API version
+ */
 const getApiRootForVersion = (version, style = APIPathStyle.FLAT) => `/${style}/${version}`;
 
-// helper to generate an OpenAPI server object when serving definitions
+/**
+ * Helper to generate an OpenAPI server object when serving definitions
+ * @param {String} apiRoot The root path for the API version
+ * @param {Request} req The express request object
+ * @return {url: String} The server object for the OpenAPI definition location
+ */
 const generateServerForApiVersion = (apiRoot, req) => ({
   url: `${settings.ssl ? 'https' : 'http'}://${req.headers.host}${apiRoot}`,
 });

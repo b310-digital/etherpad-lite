@@ -1,0 +1,47 @@
+/*
+ * The color file is copied from the colibris skin, as we are overriding the colors.
+ */
+/* -----------------------------------------------------------------
+ * COLORS
+ * If you want to change main colors, please replace following CSS variables
+ * -----------------------------------------------------------------
+ */
+
+:root {
+  --super-dark-color: #485365; /*#374256;*/
+  --dark-color: #576273; /*#4d5d77*/
+
+  --primary-color: #00a3d3 !important;
+  --middle-color: #d2d2d2; /* kind of grey, use for border for examples */
+
+  --light-color: #f2f3f4; /*#f9f9f9;*/
+  --super-light-color: white;
+
+  --text-color: var(--super-dark-color);
+  --text-soft-color: var(--dark-color);
+  --border-color: var(--middle-color);
+  --bg-soft-color: var(--light-color);
+  --bg-color: var(--super-light-color);
+
+  --toolbar-border: none;
+
+  --main-font-family: Quicksand, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
+  /* Those padding like an external padding. Basic padding of 15px is always applied */
+  --editor-horizontal-padding: 40px;
+  --editor-vertical-padding: 25px;
+}
+
+@media (max-width:1000px) {
+  :root {
+    --editor-horizontal-padding: 0px;
+    --editor-vertical-padding: 0px;
+  }
+}
+
+/* Default scrollbar values */
+body {
+  --scrollbar-bg: var(--light-color);
+  --scrollbar-track: var(--super-light-color);
+  --scrollbar-thumb: var(--dark-color);
+}

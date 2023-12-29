@@ -3,9 +3,9 @@
 const log4js = require('log4js');
 const plugins = require('./plugins');
 const hooks = require('./hooks');
-const request = require('request');
 const runCmd = require('../../../node/utils/run_cmd');
 const settings = require('../../../node/utils/Settings');
+const axios = require('axios');
 
 const logger = log4js.getLogger('plugins');
 
@@ -14,6 +14,10 @@ const onAllTasksFinished = async () => {
   await hooks.aCallAll('loadSettings', {settings});
   await hooks.aCallAll('restartServer');
 };
+
+const headers = {
+  'User-Agent': 'Etherpad/' + settings.getEpVersion(),
+}
 
 let tasks = 0;
 
@@ -71,28 +75,23 @@ let cacheTimestamp = 0;
 exports.getAvailablePlugins = (maxCacheAge) => {
   const nowTimestamp = Math.round(Date.now() / 1000);
 
-  return new Promise((resolve, reject) => {
-    // check cache age before making any request
-    if (exports.availablePlugins && maxCacheAge && (nowTimestamp - cacheTimestamp) <= maxCacheAge) {
-      return resolve(exports.availablePlugins);
-    }
-
-    request('https://static.etherpad.org/plugins.json', (er, response, plugins) => {
-      if (er) return reject(er);
-
-      try {
-        plugins = JSON.parse(plugins);
-      } catch (err) {
-        logger.error(`error parsing plugins.json: ${err.stack || err}`);
-        plugins = [];
+  return new Promise(async (resolve, reject) => {
+      // check cache age before making any request
+      if (exports.availablePlugins && maxCacheAge && (nowTimestamp - cacheTimestamp) <= maxCacheAge) {
+          return resolve(exports.availablePlugins);
       }
 
-      exports.availablePlugins = plugins;
-      cacheTimestamp = nowTimestamp;
-      resolve(plugins);
-    });
-  });
-};
+      await axios.get('https://static.etherpad.org/plugins.json', {headers: headers})
+        .then(pluginsLoaded => {
+            exports.availablePlugins = pluginsLoaded.data;
+            cacheTimestamp = nowTimestamp;
+            resolve(exports.availablePlugins);
+        })
+        .catch(async err => {
+          return reject(err);
+        });
+  })
+}
 
 
 exports.search = (searchTerm, maxCacheAge) => exports.getAvailablePlugins(maxCacheAge).then(

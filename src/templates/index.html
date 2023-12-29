@@ -1,8 +1,6 @@
-<%
-  var settings = require("ep_etherpad-lite/node/utils/Settings");
-%>
-<!doctype html>
-<html>
+<% var settings=require("ep_etherpad-lite/node/utils/Settings"); %>
+  <!doctype html>
+  <html>
 
         <title><%=settings.title%></title>
         <meta charset="utf-8">
@@ -27,7 +25,7 @@
         <script src="static/js/index.js"></script>
 
         <% e.begin_block("indexCustomStyles"); %>
-        <link href="static/skins/<%=encodeURI(settings.skinName)%>/index.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
+        <link href="static/skins/kits/index.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
         <% e.end_block(); %>
 
         <div class="order-1">
@@ -109,6 +107,7 @@
 
         <% e.begin_block("indexCustomScripts"); %>
         <script src="static/skins/<%=encodeURI(settings.skinName)%>/index.js?v=<%=settings.randomVersionString%>"></script>
+        <script src="static/skins/kits/index.js?v=<%=settings.randomVersionString%>"></script>
         <% e.end_block(); %>
         <div style="display:none"><a href="/javascript" data-jslicense="1">JavaScript license information</a></div>
 </html>

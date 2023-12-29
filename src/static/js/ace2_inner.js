@@ -2433,7 +2433,11 @@ function Ace2Inner(editorInfo, cssManagers) {
         const lineEntry = rep.lines.atIndex(lineNum);
         const lineText = lineEntry.text;
         const lineMarker = lineEntry.lineMarker;
-        if (/^ +$/.exec(lineText.substring(lineMarker, col))) {
+        if (evt.metaKey && col > lineMarker) {
+          // cmd-backspace deletes to start of line (if not already at start)
+          performDocumentReplaceRange([lineNum, lineMarker], [lineNum, col], '');
+          handled = true;
+        } else if (/^ +$/.exec(lineText.substring(lineMarker, col))) {
           const col2 = col - lineMarker;
           const tabSize = THE_TAB.length;
           const toDelete = ((col2 - 1) % tabSize) + 1;
@@ -2581,17 +2585,17 @@ function Ace2Inner(editorInfo, cssManagers) {
           const firstEditbarElement = parent.parent.$('#editbar')
               .children('ul').first().children().first()
               .children().first().children().first();
-          $(this).blur();
-          firstEditbarElement.focus();
+          $(this).trigger('blur');
+          firstEditbarElement.trigger('focus');
           evt.preventDefault();
         }
         if (!specialHandled && type === 'keydown' &&
             altKey && keyCode === 67 &&
             padShortcutEnabled.altC) {
           // Alt c focuses on the Chat window
-          $(this).blur();
+          $(this).trigger('blur');
           parent.parent.chat.show();
-          parent.parent.$('#chatinput').focus();
+          parent.parent.$('#chatinput').trigger('focus');
           evt.preventDefault();
         }
         if (!specialHandled && type === 'keydown' &&

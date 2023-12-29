@@ -42,8 +42,6 @@ exports.init = async function () {
   if (!logLevel.isLessThanOrEqualTo(log4js.levels.DEBUG)) {
     logger.warn('Disabling non-test logging for the duration of the test. ' +
                 'To enable non-test logging, change the loglevel setting to DEBUG.');
-    log4js.setGlobalLogLevel(log4js.levels.OFF);
-    logger.setLevel(logLevel);
   }
 
   // Note: This is only a shallow backup.
@@ -51,7 +49,7 @@ exports.init = async function () {
   // Start the Etherpad server on a random unused port.
   settings.port = 0;
   settings.ip = 'localhost';
-  settings.importExportRateLimiting = {max: 0};
+  settings.importExportRateLimiting = {max: 999999};
   settings.commitRateLimiting = {duration: 0.001, points: 1e6};
   exports.httpServer = await server.start();
   exports.baseUrl = `http://localhost:${exports.httpServer.address().port}`;
@@ -66,7 +64,6 @@ exports.init = async function () {
     webaccess.authnFailureDelayMs = backups.authnFailureDelayMs;
     // Note: This does not unset settings that were added.
     Object.assign(settings, backups.settings);
-    log4js.setGlobalLogLevel(logLevel);
     await server.exit();
   });
 

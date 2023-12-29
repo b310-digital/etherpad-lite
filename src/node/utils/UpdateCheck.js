@@ -1,30 +1,45 @@
 'use strict';
 const semver = require('semver');
 const settings = require('./Settings');
-const request = require('request');
+const axios = require('axios');
+const headers = {
+  'User-Agent': 'Etherpad/' + settings.getEpVersion(),
+}
 
+const updateInterval = 60 * 60 * 1000; // 1 hour
 let infos;
+let lastLoadingTime = null;
 
-const loadEtherpadInformations = () => new Promise((resolve, reject) => {
-  request('https://static.etherpad.org/info.json', (er, response, body) => {
-    if (er) return reject(er);
+const loadEtherpadInformations = () => {
+  if (lastLoadingTime !== null && Date.now() - lastLoadingTime < updateInterval) {
+    return Promise.resolve(infos);
+  }
 
-    try {
-      infos = JSON.parse(body);
-      return resolve(infos);
-    } catch (err) {
-      return reject(err);
+  return axios.get('https://static.etherpad.org/info.json', {headers: headers})
+  .then(async resp => {
+    infos = await resp.data;
+    if (infos === undefined || infos === null) {
+      await Promise.reject("Could not retrieve current version")
+      return
     }
+
+    lastLoadingTime = Date.now();
+    return await Promise.resolve(infos);
+  })
+  .catch(async err => {
+    return await Promise.reject(err);
   });
-});
+}
+
 
 exports.getLatestVersion = () => {
-  exports.needsUpdate();
-  return infos.latestVersion;
+  exports.needsUpdate().catch();
+  return infos?.latestVersion;
 };
 
-exports.needsUpdate = (cb) => {
-  loadEtherpadInformations().then((info) => {
+exports.needsUpdate = async (cb) => {
+  await loadEtherpadInformations()
+      .then((info) => {
     if (semver.gt(info.latestVersion, settings.getEpVersion())) {
       if (cb) return cb(true);
     }

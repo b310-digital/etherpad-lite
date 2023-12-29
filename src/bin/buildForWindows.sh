@@ -19,6 +19,9 @@ workdir=$(try git rev-parse --show-toplevel) || exit 1
 try cd "${workdir}"
 [ -f src/package.json ] || fatal "failed to cd to etherpad root directory"
 
+# See https://github.com/msys2/MSYS2-packages/issues/1216
+export MSYSTEM=winsymlinks:lnk
+
 OUTPUT=${workdir}/etherpad-win.zip
 
 TMP_FOLDER=$(try mktemp -d) || exit 1
@@ -26,10 +29,12 @@ trap 'exit 1' HUP INT TERM
 trap 'log "cleaning up..."; try cd / && try rm -rf "${TMP_FOLDER}"' EXIT
 
 log "create a clean environment in $TMP_FOLDER..."
-try git archive --format=tar HEAD | (try cd "${TMP_FOLDER}" && try tar xf -) \
+try export GIT_WORK_TREE=${TMP_FOLDER}; git checkout HEAD -f \
     || fatal "failed to copy etherpad to temporary folder"
 try mkdir "${TMP_FOLDER}"/.git
 try git rev-parse HEAD >${TMP_FOLDER}/.git/HEAD
+try cp -r ./src/node_modules "${TMP_FOLDER}"/src/node_modules
+
 try cd "${TMP_FOLDER}"
 [ -f src/package.json ] || fatal "failed to copy etherpad to temporary folder"
 
@@ -49,7 +54,7 @@ try rm -rf node_modules
 try mv node_modules_resolved node_modules
 
 log "download windows node..."
-try wget "https://nodejs.org/dist/latest-v16.x/win-x64/node.exe" -O node.exe
+try wget "https://nodejs.org/dist/latest-v20.x/win-x64/node.exe" -O node.exe
 
 log "create the zip..."
 try zip -9 -r "${OUTPUT}" ./*

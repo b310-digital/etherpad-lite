@@ -1,11 +1,7 @@
-<%
-  var settings = require("ep_etherpad-lite/node/utils/Settings")
-    , langs = require("ep_etherpad-lite/node/hooks/i18n").availableLangs
-    , pluginUtils = require('ep_etherpad-lite/static/js/pluginfw/shared')
-    ;
-%>
-<!doctype html>
-<html translate="no" class="pad <%=pluginUtils.clientPluginNames().join(' '); %> <%=settings.skinVariants%>">
+<% var settings=require("ep_etherpad-lite/node/utils/Settings") , langs=require("ep_etherpad-lite/node/hooks/i18n").availableLangs ,
+  pluginUtils=require('ep_etherpad-lite/static/js/pluginfw/shared') ; %>
+  <!doctype html>
+  <html translate="no" class="pad <%=pluginUtils.clientPluginNames().join(' '); %> <%=settings.skinVariants%>">
 <head>
   <% e.begin_block("htmlHead"); %>
   <% e.end_block(); %>
@@ -36,8 +32,7 @@
   <script src="../static/js/basic_error_handler.js?v=<%=settings.randomVersionString%>"></script>
   <script type="text/javascript" src="../static/js/qrcode.js"></script>
   <script type="text/javascript" src="../static/js/qrcode_download.js"></script>
-  
-  
+
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
@@ -49,6 +44,7 @@
 
   <% e.begin_block("customStyles"); %>
   <link href="../static/skins/<%=encodeURI(settings.skinName)%>/pad.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
+  <link href="../static/skins/kits/pad.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
   <% e.end_block(); %>
 
   <style title="dynamicsyntax"></style>
@@ -125,7 +121,7 @@
           <% e.begin_block("mySettings"); %>
           <h2 data-l10n-id="pad.settings.myView"></h2>
           <p class="hide-for-mobile">
-              <input type="checkbox" id="options-stickychat" onClick="chat.stickToScreen();">
+              <input type="checkbox" id="options-stickychat">
               <label for="options-stickychat" data-l10n-id="pad.settings.stickychat"></label>
           </p>
           <p class="hide-for-mobile">
@@ -171,8 +167,8 @@
           </div>
 
           <h2 data-l10n-id="pad.settings.about">About</h2>
-          <span data-l10n-id="pad.settings.poweredBy">Powered by</span>
-          <a href="https://etherpad.org">Etherpad</a>
+          <span>Powered by</span> <a href="https://etherpad.org">Etherpad</a><br/>
+          <span>Betrieben von</span> <a href="https://kits.blog">kits</a>
           <% if (settings.exposeVersion) { %>(commit <%=settings.getGitCommit()%>)<% } %>
       </div></div>
 
@@ -182,27 +178,7 @@
       <!------------------------->
 
       <div id="import_export" class="popup"><div class="popup-content">
-          <h1 data-l10n-id="pad.importExport.import_export"></h1>
-          <div class="acl-write">
-              <% e.begin_block("importColumn"); %>
-              <h2 data-l10n-id="pad.importExport.import"></h2>
-              <div class="importmessage" id="importmessageabiword" data-l10n-id="pad.importExport.abiword.innerHTML"></div><br>
-              <form id="importform" method="post" action="" target="importiframe" enctype="multipart/form-data">
-                  <div class="importformdiv" id="importformfilediv">
-                      <input type="file" name="file" size="10" id="importfileinput">
-                      <div class="importmessage" id="importmessagefail"></div>
-                  </div>
-                  <div id="import"></div>
-                  <div class="importmessage" id="importmessagesuccess" data-l10n-id="pad.importExport.importSuccessful"></div>
-                  <div class="importformdiv" id="importformsubmitdiv">
-                      <span class="nowrap">
-                          <input type="submit" class="btn btn-primary" name="submit" value="Import Now" disabled="disabled" id="importsubmitinput">
-                          <div alt="" id="importstatusball" class="loadingAnimation" align="top"></div>
-                      </span>
-                  </div>
-              </form>
-              <% e.end_block(); %>
-          </div>
+          <h1>Export</h1>
           <div id="exportColumn">
               <h2 data-l10n-id="pad.importExport.export"></h2>
               <% e.begin_block("exportColumn"); %>
@@ -214,15 +190,6 @@
               </a>
               <a id="exportplaina" target="_blank" class="exportlink">
                 <span class="exporttype buttonicon buttonicon-file" id="exportplain" data-l10n-id="pad.importExport.exportplain"></span>
-              </a>
-              <a id="exportworda" target="_blank" class="exportlink">
-                <span class="exporttype buttonicon buttonicon-file-word" id="exportword" data-l10n-id="pad.importExport.exportword"></span>
-              </a>
-              <a id="exportpdfa" target="_blank" class="exportlink">
-                <span class="exporttype buttonicon buttonicon-file-pdf" id="exportpdf" data-l10n-id="pad.importExport.exportpdf"></span>
-              </a>
-              <a id="exportopena" target="_blank" class="exportlink">
-                <span class="exporttype buttonicon buttonicon-file-alt" id="exportopen" data-l10n-id="pad.importExport.exportopen"></span>
               </a>
               <% e.end_block(); %>
           </div>

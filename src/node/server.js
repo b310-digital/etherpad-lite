@@ -25,7 +25,6 @@
  */
 
 const log4js = require('log4js');
-log4js.replaceConsole();
 
 const settings = require('./utils/Settings');
 
@@ -107,7 +106,14 @@ exports.start = async () => {
 
     process.on('uncaughtException', (err) => {
       logger.debug(`uncaught exception: ${err.stack || err}`);
-      exports.exit(err);
+
+      // eslint-disable-next-line promise/no-promise-in-callback
+      exports.exit(err)
+          .catch((err) => {
+            logger.error('Error in process exit', err);
+            // eslint-disable-next-line n/no-process-exit
+            process.exit(1);
+          });
     });
     // As of v14, Node.js does not exit when there is an unhandled Promise rejection. Convert an
     // unhandled rejection into an uncaught exception, which does cause Node.js to exit.
@@ -269,3 +275,4 @@ exports.exit = async (err = null) => {
 };
 
 if (require.main === module) exports.start();
+if (typeof(PhusionPassenger) !== 'undefined') exports.start();

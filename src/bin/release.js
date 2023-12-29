@@ -9,8 +9,12 @@ const childProcess = require('child_process');
 const log4js = require('log4js');
 const path = require('path');
 const semver = require('semver');
+const {exec} = require('child_process');
 
-log4js.replaceConsole();
+log4js.configure({appenders: {console: {type: 'console'}},
+  categories: {
+    default: {appenders: ['console'], level: 'info'},
+  }});
 
 /*
 
@@ -76,6 +80,15 @@ const assertUpstreamOk = (branch, opts = {}) => {
   }
 };
 
+// Check if asciidoctor is installed
+exec('asciidoctor -v', (err, stdout) => {
+  if (err) {
+    console.log('Please install asciidoctor');
+    console.log('https://asciidoctor.org/docs/install-toolchain/');
+    process.exit(1);
+  }
+});
+
 const dirExists = (dir) => {
   try {
     return fs.statSync(dir).isDirectory();
@@ -132,9 +145,9 @@ try {
 
   // Many users will be using the latest LTS version of npm, and the latest LTS version of npm uses
   // lockfileVersion 1. Enforce v1 so that users don't see a (benign) compatibility warning.
-  if (readJson('./src/package-lock.json').lockfileVersion !== 1) {
-    throw new Error('Please regenerate package-lock.json with npm v6.x.');
-  }
+  const pkglock = readJson('./src/package-lock.json');
+  pkglock.lockfileVersion = 1;
+  writeJson('./src/package-lock.json', pkglock);
 
   run('git add src/package.json');
   run('git add src/package-lock.json');
@@ -147,6 +160,7 @@ try {
   run('git merge --no-ff --no-edit develop');
   console.log(`Creating ${newVersion} tag...`);
   run(`git tag -s '${newVersion}' -m '${newVersion}'`);
+  run(`git tag -s 'v${newVersion}' -m 'v${newVersion}'`);
   console.log('Switching back to develop...');
   run('git checkout develop');
   console.log('Merging master into develop...');
@@ -163,17 +177,19 @@ try {
   console.warn(`Deleting ${newVersion} tag...`);
   run(`git rev-parse -q --verify refs/tags/'${newVersion}' >/dev/null || exit 0; ` +
       `git tag -d '${newVersion}'`);
+  run(`git rev-parse -q --verify refs/tags/'v${newVersion}' >/dev/null || exit 0; ` +
+      `git tag -d 'v${newVersion}'`);
   throw err;
 }
 
 try {
   console.log('Building documentation...');
-  run('make docs');
+  run('node ./make_docs.js');
   console.log('Updating ether.github.com master branch...');
   run('git pull --ff-only', {cwd: '../ether.github.com/'});
   console.log('Committing documentation...');
-  run(`cp -R out/doc/ ../ether.github.com/doc/v'${newVersion}'`);
-  run(`rm -f latest && ln -s 'v${newVersion}' latest`, {cwd: '../ether.github.com/doc/'});
+  run(`cp -R out/doc/ ../ether.github.com/public/doc/v'${newVersion}'`);
+  run(`npm version ${newVersion}`, {cwd: '../ether.github.com'});
   run('git add .', {cwd: '../ether.github.com/'});
   run(`git commit -m '${newVersion} docs'`, {cwd: '../ether.github.com/'});
 } catch (err) {
@@ -191,14 +207,10 @@ console.log('  git log --graph --date-order --boundary --oneline --decorate deve
 console.log(`  git show '${newVersion}'`);
 console.log('  (cd ../ether.github.com && git show)');
 console.log('If everything looks good then push:');
-console.log(`  git push origin master develop '${newVersion}'`);
-console.log('  (cd ../ether.github.com && git push)');
-console.log('Create a Windows build:');
-console.log('  bin/buildForWindows.sh');
-console.log('Visit https://github.com/ether/etherpad-lite/releases/new and create a new release ' +
-            `with 'master' as the target and the version is ${newVersion}.  Include the windows ` +
-            'zip as an asset');
-console.log('Once the new docs are uploaded then modify the download links (replace ' +
-            `${currentVersion} with ${newVersion} on etherpad.org and then pull master onto ` +
-            'develop)');
+console.log('Run ./bin/push-after-release.sh');
+console.log('Creating a Windows build is not necessary anymore and will be created by GitHub action');
+console.log('After the windows binary is created a new release with the set version is created automatically.' +
+    ' Just paste the release notes in there');
+console.log('The docs are updated automatically with the new version. While the windows build' +
+    ' is generated people can still download the older versions.');
 console.log('Finally go public with an announcement via our comms channels :)');

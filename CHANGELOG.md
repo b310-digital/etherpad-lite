@@ -1,4 +1,97 @@
-# 1.9.0 (not yet released)
+# 1.9.6
+
+### Notable enhancements and fixes
+
+* Prevent etherpad crash when update server is not reachable
+* Use npm@6 in Docker build
+* Fix setting the log level in settings.json
+
+
+# 1.9.5
+
+### Compability changes
+
+* This version deprecates NodeJS16 as it reached its end of life and won't receive any updates. So to get started with Etherpad v1.9.5 you need NodeJS 18 and above.
+* The bundled windows NodeJS version has been bumped to the current LTS version 20.
+
+### Notable enhancements and fixes
+
+* The support for the tidy program to tidy up HTML files has been removed. This decision was made because it hasn't been updated for years and also caused an incompability when exporting a pad with Abiword. 
+
+
+# 1.9.4
+
+### Compability changes
+
+* Log4js has been updated to the latest version. As it involved a bump of 6 major version. 
+  A lot has changed since then. Most notably the console appender has been deprecated. You can find out more about it [here](https://github.com/log4js-node/log4js-node)
+
+### Notable enhancements and fixes
+
+* Fix for MySQL: The logger calls were incorrectly configured leading to a crash when e.g. somebody uses a different encoding than standard MySQL encoding. 
+
+# 1.9.3
+
+### Compability changes
+
+* express-rate-limit has been bumped to 7.0.0: This involves the breaking change that "max: 0"
+in the importExportRateLimiting is set to always trigger. So set it to your desired value.
+If you haven't changed that value in the settings.json you are all set. 
+
+### Notable enhancements and fixes
+
+* Bugfixes
+  * Fix etherpad crashing with mongodb database
+
+* Enhancements
+  * Add surrealdb database support. You can find out more about this database [here](https://surrealdb.com).
+  * Make sqlite faster: The sqlite library has been switched to better-sqlite3. This should lead to better performance.
+
+# 1.9.2
+
+### Notable enhancements and fixes
+
+* Security
+  * Enable session key rotation: This setting can be enabled in the settings.json. It changes the signing key for the cookie authentication in a fixed interval.
+
+* Bugfixes
+  * Fix appendRevision when creating a new pad via the API without a text. 
+
+
+* Enhancements
+  * Bump JQuery to version 3.7
+  * Update elasticsearch connector to version 8
+
+### Compatibility changes
+
+* No compability changes as JQuery maintains excellent backwards compatibility. 
+
+#### For plugin authors
+
+* Please update to JQuery 3.7. There is an excellent deprecation guide over [here](https://api.jquery.com/category/deprecated/). Version 3.1 to 3.7 are relevant for the upgrade. 
+
+# 1.9.1
+
+### Notable enhancements and fixes
+
+* Security
+  * Limit requested revisions in timeslider and export to head revision. (affects v1.9.0)
+  
+* Bugfixes
+  * revisions in `CHANGESET_REQ` (timeslider) and export (txt, html, custom)
+    are now checked to be numbers.
+  * bump sql for audit fix
+* Enhancements
+  * Add keybinding meta-backspace to delete to beginning of line
+  * Fix automatic Windows build via GitHub Actions
+  * Enable docs to be build cross platform thanks to asciidoctor
+
+### Compatibility changes
+* tests: drop windows 7 test coverage & use chrome latest for admin tests
+* Require Node 16 for Etherpad and target Node 20 for testing
+
+    
+# 1.9.0
 
 ### Notable enhancements and fixes
 
@@ -16,6 +109,11 @@
     session expires (with some exceptions that will be fixed in the future).
   * Requests for static content (e.g., `/robots.txt`) and special pages (e.g.,
     the HTTP API, `/stats`) no longer create login session state.
+  * The secret used to sign the `express_sid` cookie is now automatically
+    regenerated every day (called *key rotation*) by default. If key rotation is
+    enabled, the now-deprecated `SESSIONKEY.txt` file can be safely deleted
+    after Etherpad starts up (its content is read and saved to the database and
+    used to validate signatures from old cookies until they expire).
 * The following settings from `settings.json` are now applied as expected (they
   were unintentionally ignored before):
   * `padOptions.lang`
@@ -68,6 +166,9 @@
   access for the current message only.
 * The `init_<pluginName>` server-side hooks have a new `logger` context
   property that plugins can use to log messages.
+* Prevent infinite loop when exiting the server
+* Bump dependencies
+
 
 ### Compatibility changes
 
@@ -112,6 +213,8 @@
 * The exported database records covered by the `exportEtherpadAdditionalContent`
   server-side hook now include keys like `${customPrefix}:${padId}:*`, not just
   `${customPrefix}:${padId}`.
+* Plugin locales should overwrite core's locales Stale
+* Plugin locales overwrite core locales
 
 # 1.8.18
 

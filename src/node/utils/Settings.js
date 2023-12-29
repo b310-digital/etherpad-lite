@@ -50,27 +50,32 @@ const nonSettings = [
 
 // This is a function to make it easy to create a new instance. It is important to not reuse a
 // config object after passing it to log4js.configure() because that method mutates the object. :(
-const defaultLogConfig = () => ({appenders: [{type: 'console'}]});
+const defaultLogConfig = (level) => ({appenders: {console: {type: 'console'}},
+  categories: {
+    default: {appenders: ['console'], level},
+  }});
 const defaultLogLevel = 'INFO';
 
 const initLogging = (logLevel, config) => {
   // log4js.configure() modifies exports.logconfig so check for equality first.
-  const logConfigIsDefault = deepEqual(config, defaultLogConfig());
   log4js.configure(config);
-  log4js.setGlobalLogLevel(logLevel);
-  log4js.replaceConsole();
-  // Log the warning after configuring log4js to increase the chances the user will see it.
-  if (!logConfigIsDefault) logger.warn('The logconfig setting is deprecated.');
+  log4js.getLogger('console');
+
+  // Overwrites for console output methods
+  console.debug = logger.debug.bind(logger);
+  console.log = logger.info.bind(logger);
+  console.warn = logger.warn.bind(logger);
+  console.error = logger.error.bind(logger);
 };
 
 // Initialize logging as early as possible with reasonable defaults. Logging will be re-initialized
 // with the user's chosen log level and logger config after the settings have been loaded.
-initLogging(defaultLogLevel, defaultLogConfig());
+initLogging(defaultLogLevel, defaultLogConfig(defaultLogLevel));
 
 /* Root path of the installation */
 exports.root = absolutePaths.findEtherpadRoot();
 logger.info('All relative paths will be interpreted relative to the identified ' +
-            `Etherpad base dir: ${exports.root}`);
+    `Etherpad base dir: ${exports.root}`);
 exports.settingsFilename = absolutePaths.makeAbsolute(argv.settings || 'settings.json');
 exports.credentialsFilename = absolutePaths.makeAbsolute(argv.credentials || 'credentials.json');
 
@@ -151,7 +156,7 @@ exports.defaultPadText = [
   'Welcome to Etherpad!',
   '',
   'This pad text is synchronized as you type, so that everyone viewing this page sees the same ' +
-      'text. This allows you to collaborate seamlessly on documents!',
+  'text. This allows you to collaborate seamlessly on documents!',
   '',
   'Etherpad on Github: https://github.com/ether/etherpad-lite',
 ].join('\n');
@@ -252,11 +257,6 @@ exports.abiword = null;
 exports.soffice = null;
 
 /**
- * The path of the tidy executable
- */
-exports.tidyHtml = null;
-
-/**
  * Should we support none natively supported file types on import?
  */
 exports.allowUnknownFileEnds = true;
@@ -294,12 +294,12 @@ exports.indentationOnNewLine = true;
 /*
  * log4js appender configuration
  */
-exports.logconfig = defaultLogConfig();
+exports.logconfig = null;
 
 /*
- * Session Key, do not sure this.
+ * Deprecated cookie signing key.
  */
-exports.sessionKey = false;
+exports.sessionKey = null;
 
 /*
  * Trust Proxy, whether or not trust the x-forwarded-for header.
@@ -310,6 +310,7 @@ exports.trustProxy = false;
  * Settings controlling the session cookie issued by Etherpad.
  */
 exports.cookie = {
+  keyRotationInterval: 1 * 24 * 60 * 60 * 1000,
   /*
    * Value of the SameSite cookie property. "Lax" is recommended unless
    * Etherpad will be embedded in an iframe from another site, in which case
@@ -430,6 +431,11 @@ exports.importMaxFileSize = 50 * 1024 * 1024;
  */
 exports.enableAdminUITests = false;
 
+/*
+ * Enable auto conversion of pad Ids to lowercase.
+ * e.g. /p/EtHeRpAd to /p/etherpad
+ */
+exports.lowerCasePadIds = false;
 
 // checks if abiword is avaiable
 exports.abiwordAvailable = () => {
@@ -636,9 +642,9 @@ const lookupEnvironmentVariables = (obj) => {
 
     if ((envVarValue === undefined) && (defaultValue === undefined)) {
       logger.warn(`Environment variable "${envVarName}" does not contain any value for ` +
-                  `configuration key "${key}", and no default was given. Using null. ` +
-                  'THIS BEHAVIOR MAY CHANGE IN A FUTURE VERSION OF ETHERPAD; you should ' +
-                  'explicitly use "null" as the default if you want to continue to use null.');
+          `configuration key "${key}", and no default was given. Using null. ` +
+          'THIS BEHAVIOR MAY CHANGE IN A FUTURE VERSION OF ETHERPAD; you should ' +
+          'explicitly use "null" as the default if you want to continue to use null.');
 
       /*
        * We have to return null, because if we just returned undefined, the
@@ -649,7 +655,7 @@ const lookupEnvironmentVariables = (obj) => {
 
     if ((envVarValue === undefined) && (defaultValue !== undefined)) {
       logger.debug(`Environment variable "${envVarName}" not found for ` +
-                   `configuration key "${key}". Falling back to default value.`);
+          `configuration key "${key}". Falling back to default value.`);
 
       return coerceValue(defaultValue);
     }
@@ -716,7 +722,7 @@ const parseSettings = (settingsFilename, isSettings) => {
     return replacedSettings;
   } catch (e) {
     logger.error(`There was an error processing your ${settingsType} ` +
-                 `file from ${settingsFilename}: ${e.message}`);
+        `file from ${settingsFilename}: ${e.message}`);
 
     process.exit(1);
   }
@@ -728,11 +734,13 @@ exports.reloadSettings = () => {
   storeSettings(settings);
   storeSettings(credentials);
 
+  // Init logging config
+  exports.logconfig = defaultLogConfig(exports.loglevel ? exports.loglevel : defaultLogLevel);
   initLogging(exports.loglevel, exports.logconfig);
 
   if (!exports.skinName) {
     logger.warn('No "skinName" parameter found. Please check out settings.json.template and ' +
-                'update your settings.json. Falling back to the default "colibris".');
+        'update your settings.json. Falling back to the default "colibris".');
     exports.skinName = 'colibris';
   }
 
@@ -743,7 +751,7 @@ exports.reloadSettings = () => {
 
     if (countPieces !== 1) {
       logger.error(`skinName must be the name of a directory under "${skinBasePath}". This is ` +
-                   `not valid: "${exports.skinName}". Falling back to the default "colibris".`);
+          `not valid: "${exports.skinName}". Falling back to the default "colibris".`);
 
       exports.skinName = 'colibris';
     }
@@ -754,7 +762,7 @@ exports.reloadSettings = () => {
     // what if someone sets skinName == ".." or "."? We catch him!
     if (absolutePaths.isSubdir(skinBasePath, skinPath) === false) {
       logger.error(`Skin path ${skinPath} must be a subdirectory of ${skinBasePath}. ` +
-                   'Falling back to the default "colibris".');
+          'Falling back to the default "colibris".');
 
       exports.skinName = 'colibris';
       skinPath = path.join(skinBasePath, exports.skinName);
@@ -800,12 +808,14 @@ exports.reloadSettings = () => {
     });
   }
 
+  const sessionkeyFilename = absolutePaths.makeAbsolute(argv.sessionkey || './SESSIONKEY.txt');
   if (!exports.sessionKey) {
-    const sessionkeyFilename = absolutePaths.makeAbsolute(argv.sessionkey || './SESSIONKEY.txt');
     try {
       exports.sessionKey = fs.readFileSync(sessionkeyFilename, 'utf8');
       logger.info(`Session key loaded from: ${sessionkeyFilename}`);
-    } catch (e) {
+    } catch (err) { /* ignored */ }
+    const keyRotationEnabled = exports.cookie.keyRotationInterval && exports.cookie.sessionLifetime;
+    if (!exports.sessionKey && !keyRotationEnabled) {
       logger.info(
           `Session key file "${sessionkeyFilename}" not found. Creating with random contents.`);
       exports.sessionKey = randomString(32);
@@ -813,9 +823,13 @@ exports.reloadSettings = () => {
     }
   } else {
     logger.warn('Declaring the sessionKey in the settings.json is deprecated. ' +
-                'This value is auto-generated now. Please remove the setting from the file. -- ' +
-                'If you are seeing this error after restarting using the Admin User ' +
-                'Interface then you can ignore this message.');
+        'This value is auto-generated now. Please remove the setting from the file. -- ' +
+        'If you are seeing this error after restarting using the Admin User ' +
+        'Interface then you can ignore this message.');
+  }
+  if (exports.sessionKey) {
+    logger.warn(`The sessionKey setting and ${sessionkeyFilename} file are deprecated; ` +
+        'use automatic key rotation instead (see the cookie.keyRotationInterval setting).');
   }
 
   if (exports.dbType === 'dirty') {
@@ -831,7 +845,7 @@ exports.reloadSettings = () => {
   if (exports.ip === '') {
     // using Unix socket for connectivity
     logger.warn('The settings file contains an empty string ("") for the "ip" parameter. The ' +
-                '"port" parameter will be interpreted as the path to a Unix socket to bind at.');
+        '"port" parameter will be interpreted as the path to a Unix socket to bind at.');
   }
 
   /*
@@ -855,3 +869,4 @@ exports.exportedForTestingOnly = {
 
 // initially load settings
 exports.reloadSettings();
+

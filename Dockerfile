@@ -4,15 +4,21 @@
 #
 # Author: muxator
 
-FROM node:lts-slim
+FROM node:lts-alpine
 LABEL maintainer="Etherpad team, https://github.com/ether/etherpad-lite"
 
 ARG TIMEZONE=
+
 RUN \
   [ -z "${TIMEZONE}" ] || { \
-    ln -sf /usr/share/zoneinfo/"${TIMEZONE#/usr/share/zoneinfo/}" /etc/localtime; \
-    dpkg-reconfigure -f noninteractive tzdata; \
+    apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
+    echo "${TIMEZONE}" > /etc/timezone; \
   }
+ENV TIMEZONE=${TIMEZONE}
+
+# Control the configuration file to be copied into the container.
+ARG SETTINGS=./settings.json.docker
 
 # plugins to install while building the container. By default no plugins are
 # installed.
@@ -42,7 +48,9 @@ ARG INSTALL_SOFFICE=
 # leaner (development dependencies are not installed) and runs faster (among
 # other things, assets are minified & compressed).
 ENV NODE_ENV=production
-
+ENV ETHERPAD_PRODUCTION=true
+# Install dependencies required for modifying access.
+RUN apk add shadow bash
 # Follow the principle of least privilege: run as unprivileged user.
 #
 # Running as non-root enables running this image in platforms like OpenShift
@@ -54,6 +62,9 @@ ARG EP_HOME=
 ARG EP_UID=5001
 ARG EP_GID=0
 ARG EP_SHELL=
+
+ENV NODE_ENV=production
+
 RUN groupadd --system ${EP_GID:+--gid "${EP_GID}" --non-unique} etherpad && \
     useradd --system ${EP_UID:+--uid "${EP_UID}" --non-unique} --gid etherpad \
         ${EP_HOME:+--home-dir "${EP_HOME}"} --create-home \
@@ -64,18 +75,15 @@ RUN mkdir -p "${EP_DIR}" && chown etherpad:etherpad "${EP_DIR}"
 
 # the mkdir is needed for configuration of openjdk-11-jre-headless, see
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
-RUN export DEBIAN_FRONTEND=noninteractive; \
+RUN  \
     mkdir -p /usr/share/man/man1 && \
-    apt-get -qq update && \
-    apt-get -qq dist-upgrade && \
-    apt-get -qq --no-install-recommends install \
+    npm install npm@6 -g  && \
+    apk update && apk upgrade && \
+    apk add  \
         ca-certificates \
         git \
-        ${INSTALL_ABIWORD:+abiword} \
-        ${INSTALL_SOFFICE:+libreoffice} \
-        && \
-    apt-get -qq clean && \
-    rm -rf /var/lib/apt/lists/*
+        ${INSTALL_ABIWORD:+abiword abiword-plugin-command} \
+        ${INSTALL_SOFFICE:+libreoffice openjdk8-jre libreoffice-common}
 
 USER etherpad
 
@@ -97,7 +105,7 @@ RUN { [ -z "${ETHERPAD_PLUGINS}" ] || \
     rm -rf ~/.npm
 
 # Copy the configuration file.
-COPY --chown=etherpad:etherpad ./settings.json.docker "${EP_DIR}"/settings.json
+COPY --chown=etherpad:etherpad ${SETTINGS} "${EP_DIR}"/settings.json
 
 # Fix group permissions
 RUN chmod -R g=u .

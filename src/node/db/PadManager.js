@@ -22,6 +22,7 @@
 const CustomError = require('../utils/customError');
 const Pad = require('../db/Pad');
 const db = require('./DB');
+const settings = require('../utils/Settings');
 
 /**
  * A cache of all loaded Pads.
@@ -58,6 +59,7 @@ const padList = new class {
 
   /**
    * Returns all pads in alphabetical order as array.
+   * @returns {Promise<string[]>} A promise that resolves to an array of pad IDs.
    */
   async getPads() {
     if (!this._loaded) {
@@ -169,6 +171,8 @@ exports.sanitizePadId = async (padId) => {
 
     padId = padId.replace(from, to);
   }
+
+  if (settings.lowerCasePadIds) padId = padId.toLowerCase();
 
   // we're out of possible transformations, so just return it
   return padId;

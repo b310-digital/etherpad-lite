@@ -22,7 +22,6 @@ services:
           ep_helmet
           ep_font_size
           ep_disable_imports
-        INSTALL_SOFFICE: 'true'
     depends_on:
       - postgres_prod
     environment:
@@ -36,7 +35,7 @@ services:
       # For now, the env var DEFAULT_PAD_TEXT cannot be unset or empty; it seems to be mandatory in the latest version of etherpad
       DEFAULT_PAD_TEXT: ${DOCKER_COMPOSE_APP_PROD_ENV_DEFAULT_PAD_TEXT:- }
       DISABLE_IP_LOGGING: ${DOCKER_COMPOSE_APP_PROD_ENV_DISABLE_IP_LOGGING:-true}
-      SOFFICE: ${DOCKER_COMPOSE_APP_PROD_ENV_SOFFICE:-/usr/bin/soffice}
+      SOFFICE: ${DOCKER_COMPOSE_APP_PROD_ENV_SOFFICE:-null}
       TRUST_PROXY: ${DOCKER_COMPOSE_APP_PROD_ENV_TRUST_PROXY:-true}
     restart: always
     ports:

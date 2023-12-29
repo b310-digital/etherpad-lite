@@ -27,8 +27,8 @@ const fs = require('fs');
 const settings = require('../utils/Settings');
 const os = require('os');
 const hooks = require('../../static/js/pluginfw/hooks');
-const TidyHtml = require('../utils/TidyHtml');
 const util = require('util');
+const { checkValidRev } = require('../utils/checkValidRev');
 
 const fsp_writeFile = util.promisify(fs.writeFile);
 const fsp_unlink = util.promisify(fs.unlink);
@@ -37,6 +37,11 @@ const tempDirectory = os.tmpdir();
 
 /**
  * do a requested export
+ * @param {Object} req the request object
+ * @param {Object} res the response object
+ * @param {String} padId the pad id to export
+ * @param {String} readOnlyId the read only id of the pad to export
+ * @param {String} type the type to export
  */
 exports.doExport = async (req, res, padId, readOnlyId, type) => {
   // avoid naming the read-only file as the original pad's id
@@ -52,6 +57,12 @@ exports.doExport = async (req, res, padId, readOnlyId, type) => {
 
   // tell the browser that this is a downloadable file
   res.attachment(`${fileName}.${type}`);
+
+  if (req.params.rev !== undefined) {
+    // ensure revision is a number
+    // modify req, as we use it in a later call to exportConvert
+    req.params.rev = checkValidRev(req.params.rev);
+  }
 
   // if this is a plain text export, we can do this directly
   // We have to over engineer this because tabs are stored as attributes and not plain text
@@ -81,10 +92,8 @@ exports.doExport = async (req, res, padId, readOnlyId, type) => {
     const srcFile = `${tempDirectory}/etherpad_export_${randNum}.html`;
     await fsp_writeFile(srcFile, html);
 
-    // Tidy up the exported HTML
     // ensure html can be collected by the garbage collector
     html = null;
-    await TidyHtml.tidy(srcFile);
 
     // send the convert job to the converter (abiword, libreoffice, ..)
     const destFile = `${tempDirectory}/etherpad_export_${randNum}.${type}`;
