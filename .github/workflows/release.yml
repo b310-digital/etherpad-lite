@@ -15,7 +15,6 @@ on:
   push:
     branches: 
       - kits
-      - kits-etherpad-tag-1-9-6
   release:
     types: [published]
 
