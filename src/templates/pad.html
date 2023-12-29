@@ -1,11 +1,7 @@
-<%
-  var settings = require("ep_etherpad-lite/node/utils/Settings")
-    , langs = require("ep_etherpad-lite/node/hooks/i18n").availableLangs
-    , pluginUtils = require('ep_etherpad-lite/static/js/pluginfw/shared')
-    ;
-%>
-<!doctype html>
-<html translate="no" class="pad <%=pluginUtils.clientPluginNames().join(' '); %> <%=settings.skinVariants%>">
+<% var settings=require("ep_etherpad-lite/node/utils/Settings") , langs=require("ep_etherpad-lite/node/hooks/i18n").availableLangs ,
+  pluginUtils=require('ep_etherpad-lite/static/js/pluginfw/shared') ; %>
+  <!doctype html>
+  <html translate="no" class="pad <%=pluginUtils.clientPluginNames().join(' '); %> <%=settings.skinVariants%>">
 <head>
   <% e.begin_block("htmlHead"); %>
   <% e.end_block(); %>
@@ -36,8 +32,7 @@
   <script src="../static/js/basic_error_handler.js?v=<%=settings.randomVersionString%>"></script>
   <script type="text/javascript" src="../static/js/qrcode.js"></script>
   <script type="text/javascript" src="../static/js/qrcode_download.js"></script>
-  
-  
+
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
@@ -49,6 +44,7 @@
 
   <% e.begin_block("customStyles"); %>
   <link href="../static/skins/<%=encodeURI(settings.skinName)%>/pad.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
+  <link href="../static/skins/kits/pad.css?v=<%=settings.randomVersionString%>" rel="stylesheet">
   <% e.end_block(); %>
 
   <style title="dynamicsyntax"></style>
@@ -171,8 +167,8 @@
           </div>
 
           <h2 data-l10n-id="pad.settings.about">About</h2>
-          <span data-l10n-id="pad.settings.poweredBy">Powered by</span>
-          <a href="https://etherpad.org">Etherpad</a>
+          <span>Powered by</span><a href="https://etherpad.org">Etherpad</a><br/>
+          <span>Betrieben von</span><a href="https://kits.blog">kits</a>
           <% if (settings.exposeVersion) { %>(commit <%=settings.getGitCommit()%>)<% } %>
       </div></div>
 

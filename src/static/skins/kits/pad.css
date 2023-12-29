@@ -1,29 +1,6 @@
-@import url("src/general.css");
-@import url("src/layout.css");
-@import url("src/pad-editor.css");
-
-@import url("src/components/scrollbars.css");
-@import url("src/components/buttons.css");
-@import url("src/components/popup.css");
-
-@import url("src/components/chat.css");
-@import url("src/components/sidediv.css");
-@import url("src/components/gritter.css");
-@import url("src/components/table-of-content.css");
-@import url("src/components/toolbar.css");
-@import url("src/components/users.css");
-@import url("src/components/form.css");
-@import url("src/components/import-export.css");
-
-@import url("src/plugins/brightcolorpicker.css");
-@import url("src/plugins/font_color.css");
-@import url("src/plugins/tables2.css");
-@import url("src/plugins/set_title_on_pad.css");
-@import url("src/plugins/author_hover.css");
-@import url("src/plugins/comments.css");
-
-@import url("src/pad-variants.css");
-
+/*
+ * The color file is copied from the colibris skin, as we are overriding the colors.
+ */
 /* -----------------------------------------------------------------
  * COLORS
  * If you want to change main colors, please replace following CSS variables
@@ -34,7 +11,7 @@
   --super-dark-color: #485365; /*#374256;*/
   --dark-color: #576273; /*#4d5d77*/
 
-  --primary-color: #64d29b;
+  --primary-color: #00a3d3 !important;
   --middle-color: #d2d2d2; /* kind of grey, use for border for examples */
 
   --light-color: #f2f3f4; /*#f9f9f9;*/

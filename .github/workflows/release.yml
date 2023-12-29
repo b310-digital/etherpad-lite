@@ -15,7 +15,7 @@ on:
   push:
     branches: 
       - kits
-      - postgresql-migration
+      - kits-etherpad-tag-1-9-6
   release:
     types: [published]
 
