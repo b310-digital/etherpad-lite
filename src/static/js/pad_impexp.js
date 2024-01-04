@@ -22,6 +22,10 @@
  * limitations under the License.
  */
 
+const { jsPDF } = require("jspdf/dist/jspdf.umd.min.js");
+window.DOMPurify = require("dompurify/dist/purify.min.js");
+window.html2canvas = require("html2canvas/dist/html2canvas.min.js");
+
 const padimpexp = (() => {
   let pad;
 
@@ -120,6 +124,20 @@ const padimpexp = (() => {
     return false;
   }
 
+  function printPDF(url, id) {
+    fetch(url).then((response) => {
+      return response.text();
+    }).then((html) => {
+      const doc = new jsPDF('p', 'px', 'letter');
+      const wrappedHTML = `<div style="page-break-inside: avoid; font-size:8px; width:430px;">${html}</div>`;
+      doc.html(wrappedHTML, {
+        callback: (doc) => doc.output('save', `etherpad-${id}.pdf`),
+        x: 15,
+        y: 15
+      })
+    });
+  }
+
   // ///
   const self = {
     init: (_pad) => {
@@ -139,17 +157,19 @@ const padimpexp = (() => {
       $('#exporthtmla').attr('href', `${padRootPath}/export/html`);
       $('#exportetherpada').attr('href', `${padRootPath}/export/etherpad`);
       $('#exportplaina').attr('href', `${padRootPath}/export/txt`);
+      $('#exportpdfa').attr('href', '#');
+      $('#exportpdfa').on('click', (e) => {
+        e.preventDefault();
+        printPDF(`${padRootPath}/export/html`, clientVars.padId);
+      });
 
       // hide stuff thats not avaible if abiword/soffice is disabled
       if (clientVars.exportAvailable === 'no') {
         $('#exportworda').remove();
-        $('#exportpdfa').remove();
         $('#exportopena').remove();
 
         $('#importmessageabiword').show();
       } else if (clientVars.exportAvailable === 'withoutPDF') {
-        $('#exportpdfa').remove();
-
         $('#exportworda').attr('href', `${padRootPath}/export/doc`);
         $('#exportopena').attr('href', `${padRootPath}/export/odt`);
 

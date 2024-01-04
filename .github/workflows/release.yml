@@ -12,9 +12,6 @@
 name: Create and publish a Docker image
 
 on:
-  push:
-    branches: 
-      - kits
   release:
     types: [published]
 
@@ -57,3 +54,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          target: production
