@@ -1,4 +1,4 @@
-function initialise_qrcode() {
+function initialize_qrcode() {
     document.getElementById("embedreadonly").addEventListener('change', (changeEvent) => { 
       generate_qrcode();
       return true;
