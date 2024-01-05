@@ -479,7 +479,8 @@
         padimpexp = require('ep_etherpad-lite/static/js/pad_impexp').padimpexp;
         require('ep_etherpad-lite/static/js/skin_variants');
 
-        // load qrcode:
+        // load qrcode - we need to set the embed links first:
+        padeditbar.setEmbedLinks()
         initialize_qrcode()
 
       }());
