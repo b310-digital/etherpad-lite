@@ -62,7 +62,7 @@ function createQrCode(qrCodeDiv, url, width, height) {
 function addDownloadButton(qrCode) {
   const downloadButton = document.createElement('button');
   downloadButton.id = 'qr-code-download';
-  downloadButton.textContent = 'QR-Code herunterladen';
+  downloadButton.textContent = 'Download';
 
   downloadButton.addEventListener('click', function(clickEvent) {
         qrCode.download({ name: "qr", extension: 'png' });
