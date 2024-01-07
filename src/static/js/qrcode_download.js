@@ -1,22 +1,75 @@
-function download(){
-    var link = document.createElement('a'); //Creates an 'a' element
-    var thisImg = document.getElementById('qrcode').getElementsByTagName('img')[0]; //gets the first canvas element on the page, assuming the canvas you want to download is this element. 
-    link.download = 'qrcode.png'; //Gives the download an output link
-    link.href = thisImg.src //Gives the data to the link
-    link.click(); //Clicks the 'a' element we created
-}
+function initialize_qrcode() {
+    document.getElementById("embedreadonly").addEventListener('change', (changeEvent) => { 
+      generate_qrcode();
+      return true;
+    });
 
-function update_qrcode() {
-    delete_qrcode();
-    generate_qrcode();
-}
-
-function delete_qrcode() {
-    document.getElementById('qrcode').getElementsByTagName('img')[0].remove();
-    document.getElementById('qrcode').getElementsByTagName('canvas')[0].remove();
+    generate_qrcode()
 }
 
 function generate_qrcode() {
-    let qrlink = document.getElementById("linkinput").value;
-    new QRCode(document.getElementById("qrcode"), qrlink);
+    const url = document.getElementById("linkinput").value;
+    const qrCodeDiv = document.getElementById('qrcode')
+    const width = 200;
+    const height = 200;
+
+    // clear old code:
+    qrCodeDiv.innerHTML = '';
+
+    createQrCode(qrCodeDiv, url, width, height)
 } 
+
+function qrCodeOptions(url, width, height) {
+     return {
+        width: width,
+        height: height,
+        type: "svg",
+        data: url,
+        image: "",
+        dotsOptions: {
+            color: '#000000',
+            type: 'dots',
+        },
+        cornersSquareOptions: {
+            type: 'square'
+        },
+        cornersDotOptions: {
+            type: 'dot'
+        },
+        backgroundOptions: {
+            color: "#fff",
+        },
+        imageOptions: {
+            crossOrigin: "anonymous",
+            margin: 0,
+        },    
+    }
+  }
+
+function createQrCode(qrCodeDiv, url, width, height) {
+    const canvas = document.createElement('div');
+    qrCodeDiv.appendChild(canvas)
+
+    let qrCode = new QRCodeStyling(qrCodeOptions(url, width, height));
+    qrCode.append(canvas);
+    const downloadButton = addDownloadButton(qrCode);
+    
+    qrCodeDiv.appendChild(downloadButton)
+  
+    return qrCode   
+}
+
+function addDownloadButton(qrCode) {
+  const downloadButton = document.createElement('button');
+  downloadButton.id = 'qr-code-download';
+  downloadButton.textContent = 'Download';
+
+  downloadButton.addEventListener('click', function(clickEvent) {
+        qrCode.download({ name: "qr", extension: 'png' });
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        return false;
+  })
+  return downloadButton;
+}
+

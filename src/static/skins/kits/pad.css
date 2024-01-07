@@ -45,3 +45,7 @@ body {
   --scrollbar-track: var(--super-light-color);
   --scrollbar-thumb: var(--dark-color);
 }
+
+#qr-code-download {
+  padding: 10px 0px;
+}
